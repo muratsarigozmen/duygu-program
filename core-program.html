@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Core & Stabilite Programı</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f4f0;
+    --surface: #ffffff;
+    --border: #d8d8d0;
+    --accent: #2d6a2d;
+    --accent-dim: #4a8a4a;
+    --text: #1a1a1a;
+    --muted: #666;
+    --warm: #b87800;
+    --danger: #cc2200;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Instrument Sans', sans-serif;
+    min-height: 100vh;
+    padding: 32px 16px 80px;
+  }
+
+  .header {
+    max-width: 680px;
+    margin: 0 auto 48px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 32px;
+  }
+
+  .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(32px, 6vw, 52px);
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 520px;
+  }
+
+  .warning-box {
+    max-width: 680px;
+    margin: 0 auto 40px;
+    background: #fffbf0;
+    border: 1px solid #e0cc80;
+    border-left: 3px solid var(--warm);
+    padding: 16px 20px;
+    border-radius: 4px;
+  }
+
+  .warning-box p {
+    font-size: 13px;
+    color: #7a5a00;
+    line-height: 1.6;
+  }
+
+  .warning-box strong {
+    color: var(--warm);
+  }
+
+  .stats-row {
+    max-width: 680px;
+    margin: 0 auto 48px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .stat {
+    background: var(--surface);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* Timer */
+  .timer-section {
+    max-width: 680px;
+    margin: 0 auto 48px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    text-align: center;
+  }
+
+  .timer-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+  }
+
+  .timer-current-exercise {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 20px;
+    min-height: 32px;
+  }
+
+  .timer-display {
+    font-family: 'DM Mono', monospace;
+    font-size: 72px;
+    font-weight: 300;
+    color: var(--accent);
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 8px;
+    transition: color 0.3s;
+  }
+
+  .timer-display.rest { color: var(--warm); }
+  .timer-display.done { color: var(--accent); }
+
+  .timer-phase {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 24px;
+    min-height: 18px;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 1s linear, background 0.3s;
+  }
+
+  .progress-fill.rest { background: var(--warm); }
+
+  .timer-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+
+  .btn:hover { background: var(--border); }
+
+  .btn.primary {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+    font-weight: 500;
+  }
+
+  .btn.primary:hover { background: #245224; }
+
+  .btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  /* Exercises */
+  .section-title {
+    max-width: 680px;
+    margin: 0 auto 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  .exercises {
+    max-width: 680px;
+    margin: 0 auto 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .exercise-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    gap: 16px;
+    align-items: start;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: default;
+  }
+
+  .exercise-card.active {
+    border-color: var(--accent);
+    background: #eef6ee;
+  }
+
+  .exercise-card.completed {
+    opacity: 0.5;
+  }
+
+  .ex-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    padding-top: 3px;
+    text-align: center;
+  }
+
+  .exercise-card.active .ex-num { color: var(--accent); }
+
+  .ex-check {
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .exercise-card.active .ex-check { border-color: var(--accent); background: var(--accent); }
+  .exercise-card.completed .ex-check { background: var(--muted); border-color: var(--muted); }
+
+  .check-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ffffff;
+    display: none;
+  }
+
+  .exercise-card.active .check-dot,
+  .exercise-card.completed .check-dot { display: block; }
+
+  .ex-body {}
+
+  .ex-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .ex-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent-dim);
+    margin-bottom: 8px;
+  }
+
+  .ex-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .ex-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Notes */
+  .notes-section {
+    max-width: 680px;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+  }
+
+  .notes-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .note-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: start;
+  }
+
+  .note-bullet {
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  .note-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .note-text strong { color: var(--text); }
+
+  @media (max-width: 480px) {
+    .exercise-card { grid-template-columns: 32px 1fr; }
+    .ex-check { display: none; }
+    .timer-display { font-size: 56px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="label">Günlük Program · Düşük Kalp Atış Hızı</div>
+  <h1>Duygu'nun <em>Programı</em></h1>
+  <p class="subtitle">Kalp atışını minimal arttıran, core kaslarını ve postürü geliştiren 12–14 dakikalık günlük protokol.</p>
+</div>
+
+
+
+<div class="stats-row">
+  <div class="stat">
+    <span class="stat-value">13</span>
+    <span class="stat-label">Dakika</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value">6</span>
+    <span class="stat-label">Egzersiz</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value">Düşük</span>
+    <span class="stat-label">Kalp Yükü</span>
+  </div>
+</div>
+
+<!-- Timer -->
+<div class="timer-section">
+  <div class="timer-label">Zamanlayıcı</div>
+  <div class="timer-current-exercise" id="currentExName">Başlamak için butona bas</div>
+  <div class="timer-display" id="timerDisplay">00:00</div>
+  <div class="timer-phase" id="timerPhase">—</div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="timer-controls">
+    <button class="btn primary" id="startBtn" onclick="startProgram()">Programı Başlat</button>
+    <button class="btn" id="pauseBtn" onclick="togglePause()" style="opacity:0.3;pointer-events:none;">Duraklat</button>
+    <button class="btn" id="resetBtn" onclick="resetProgram()">Sıfırla</button>
+  </div>
+</div>
+
+<!-- Exercise List -->
+<div class="section-title">Egzersizler</div>
+<div class="exercises" id="exerciseList">
+
+  <div class="exercise-card" id="exCard0">
+    <div class="ex-num">01</div>
+    <div class="ex-body">
+      <div class="ex-name">Diyafram Nefesi (Hazırlık)</div>
+      <div class="ex-meta">60 sn · Isınma</div>
+      <div class="ex-desc">Sırt üstü yat, dizler kırık. Bir elin karnına, diğeri göğsüne koy. Burnundan 4 sn iç, karnın şişsin. Ağızdan 6 sn ver. Göğsün hareket etmesin.</div>
+      <div class="ex-tags"><span class="tag">Nefes</span><span class="tag">Aktivasyon</span></div>
+    </div>
+    <div class="ex-check"><div class="check-dot"></div></div>
+  </div>
+
+  <div class="exercise-card" id="exCard1">
+    <div class="ex-num">02</div>
+    <div class="ex-body">
+      <div class="ex-name">Pelvic Tilt (Pelvis Tilt)</div>
+      <div class="ex-meta">45 sn · Core aktivasyonu</div>
+      <div class="ex-desc">Sırt üstü yat, dizler kırık, ayak tabanları yerde. Kasıklarını tavana doğru hafifçe kaldırarak beli yere bastır. 3 sn tut, bırak. Kalçayı kaldırma — hareket minimal.</div>
+      <div class="ex-tags"><span class="tag">Core</span><span class="tag">Bel</span><span class="tag">Düşük Yük</span></div>
+    </div>
+    <div class="ex-check"><div class="check-dot"></div></div>
+  </div>
+
+  <div class="exercise-card" id="exCard2">
+    <div class="ex-num">03</div>
+    <div class="ex-body">
+      <div class="ex-name">Dead Bug</div>
+      <div class="ex-meta">60 sn · Temel core stabilitesi</div>
+      <div class="ex-desc">Sırt üstü yat, kollar tavana uzat, dizler 90° kırık havada. Sağ kolunu geriye, sol bacağını öne aynı anda uzan — belin yere değsin. 3 sn tut, geri gel. Diğer taraf. Yavaş, kontrollü.</div>
+      <div class="ex-tags"><span class="tag">Core</span><span class="tag">Derin Kas</span><span class="tag">Simetri</span></div>
+    </div>
+    <div class="ex-check"><div class="check-dot"></div></div>
+  </div>
+
+  <div class="exercise-card" id="exCard3">
+    <div class="ex-num">04</div>
+    <div class="ex-body">
+      <div class="ex-name">Bird Dog</div>
+      <div class="ex-meta">60 sn · Spinal stabilite</div>
+      <div class="ex-desc">Dört ayak pozisyonu. Elleriniz omuz altında, dizler kalça altında. Sağ kolunu öne, sol bacağını arkaya uzat — düz çizgi. 3–5 sn tut, kontrollü indir. Bel sallanmasın.</div>
+      <div class="ex-tags"><span class="tag">Sırt</span><span class="tag">Postür</span><span class="tag">Denge</span></div>
+    </div>
+    <div class="ex-check"><div class="check-dot"></div></div>
+  </div>
+
+  <div class="exercise-card" id="exCard4">
+    <div class="ex-num">05</div>
+    <div class="ex-body">
+      <div class="ex-name">Glute Bridge</div>
+      <div class="ex-meta">45 sn · Kalça &amp; bel desteği</div>
+      <div class="ex-desc">Sırt üstü, dizler kırık. Kalçayı kaldır, omuzdan dize düz çizgi. En üstte 3 sn tut, kalça kasını sık. Yavaşça indir. Hızlı sekme yok.</div>
+      <div class="ex-tags"><span class="tag">Kalça</span><span class="tag">Bel</span><span class="tag">Postür</span></div>
+    </div>
+    <div class="ex-check"><div class="check-dot"></div></div>
+  </div>
+
+  <div class="exercise-card" id="exCard5">
+    <div class="ex-num">06</div>
+    <div class="ex-body">
+      <div class="ex-name">Cat-Cow Stretch (Soğuma)</div>
+      <div class="ex-meta">60 sn · Mobilite &amp; soğuma</div>
+      <div class="ex-desc">Dört ayak pozisyonu. Cat: belini tavana doğru yuvarlat, başını içeri al. Cow: belini aşağı bırak, başını kaldır. Her harekette 3–4 sn kal. Nefesle senkronize et.</div>
+      <div class="ex-tags"><span class="tag">Mobilite</span><span class="tag">Soğuma</span><span class="tag">Omurga</span></div>
+    </div>
+    <div class="ex-check"><div class="check-dot"></div></div>
+  </div>
+
+</div>
+
+<!-- Notes -->
+<div class="notes-section">
+  <div class="notes-title">Program Notları</div>
+  <div class="note-item">
+    <span class="note-bullet">01</span>
+    <p class="note-text"><strong>Nefes tekniği kritik:</strong> Her egzersizde zorlanma anında nefes ver, gevşeme anında al. Nefesinizi tutmayın.</p>
+  </div>
+  <div class="note-item">
+    <span class="note-bullet">02</span>
+    <p class="note-text"><strong>Bel bölgesine dikkat:</strong> Dead Bug ve Bird Dog'da belini yere bastır. Bel boşluğu oluşuyorsa yanlış yapıyorsun.</p>
+  </div>
+  <div class="note-item">
+    <span class="note-bullet">03</span>
+    <p class="note-text"><strong>Kalp atışı artarsa dur:</strong> Hızlanma hissedersen hareketi yavaşlat ya da seti atla. Program zorlanma değil kontrol üzerine kurulu.</p>
+  </div>
+  <div class="note-item">
+    <span class="note-bullet">04</span>
+    <p class="note-text"><strong>Haftada 5–6 gün:</strong> Düşük yoğunluklu olduğu için günlük uygulanabilir; dinlenme günü eklemek isteğe bağlı.</p>
+  </div>
+  <div class="note-item">
+    <span class="note-bullet">05</span>
+    <p class="note-text"><strong>İlerleme:</strong> 3–4 haftada bir süreleri +5 saniye arttır ya da set sayısını ikiye çıkar. Adaptasyon olmadan sonuç olmaz.</p>
+  </div>
+</div>
+
+<script>
+var exData = [
+  { name: "Diyafram Nefesi (Hazirlik)", duration: 60, rest: 15 },
+  { name: "Pelvic Tilt", duration: 45, rest: 20 },
+  { name: "Dead Bug", duration: 60, rest: 20 },
+  { name: "Bird Dog", duration: 60, rest: 20 },
+  { name: "Glute Bridge", duration: 45, rest: 20 },
+  { name: "Cat-Cow Stretch (Soguma)", duration: 60, rest: 0 }
+];
+
+var currentExIndex = -1;
+var currentPhase = 'work';
+var timeLeft = 0;
+var totalTime = 0;
+var elapsed = 0;
+var timerInterval = null;
+var paused = false;
+var started = false;
+
+function getTotalTime() {
+  var t = 0;
+  for (var i = 0; i < exData.length; i++) {
+    t += exData[i].duration + exData[i].rest;
+  }
+  return t;
+}
+
+function pad(n) {
+  return n < 10 ? '0' + n : '' + n;
+}
+
+function formatTime(s) {
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return pad(m) + ':' + pad(sec);
+}
+
+function setBtn(id, enabled) {
+  var b = document.getElementById(id);
+  if (enabled) {
+    b.style.opacity = '1';
+    b.style.pointerEvents = 'auto';
+  } else {
+    b.style.opacity = '0.3';
+    b.style.pointerEvents = 'none';
+  }
+}
+
+function setActiveCard(i) {
+  for (var idx = 0; idx < exData.length; idx++) {
+    var card = document.getElementById('exCard' + idx);
+    card.className = 'exercise-card';
+    if (idx < i) card.className = 'exercise-card completed';
+    if (idx === i) card.className = 'exercise-card active';
+  }
+}
+
+function updateUI() {
+  var timerEl = document.getElementById('timerDisplay');
+  var phaseEl = document.getElementById('timerPhase');
+  var nameEl = document.getElementById('currentExName');
+  var fillEl = document.getElementById('progressFill');
+
+  timerEl.textContent = formatTime(timeLeft);
+
+  if (currentPhase === 'rest') {
+    timerEl.className = 'timer-display rest';
+    fillEl.className = 'progress-fill rest';
+  } else {
+    timerEl.className = 'timer-display';
+    fillEl.className = 'progress-fill';
+  }
+
+  var pct = Math.floor((elapsed / totalTime) * 100);
+  if (pct > 100) pct = 100;
+  fillEl.style.width = pct + '%';
+
+  if (currentPhase === 'work') {
+    nameEl.textContent = exData[currentExIndex].name;
+    phaseEl.textContent = 'Egzersiz ' + (currentExIndex + 1) + ' / ' + exData.length;
+  } else {
+    nameEl.textContent = 'Dinlenme';
+    var next = exData[currentExIndex + 1];
+    phaseEl.textContent = 'Sonraki: ' + (next ? next.name : '-');
+  }
+
+  setActiveCard(currentExIndex);
+}
+
+function nextExercise() {
+  currentExIndex++;
+  if (currentExIndex >= exData.length) {
+    finishProgram();
+    return;
+  }
+  currentPhase = 'work';
+  timeLeft = exData[currentExIndex].duration;
+  updateUI();
+}
+
+function tick() {
+  if (paused) return;
+  timeLeft--;
+  elapsed++;
+  updateUI();
+
+  if (timeLeft <= 0) {
+    if (currentPhase === 'work' && exData[currentExIndex].rest > 0) {
+      currentPhase = 'rest';
+      timeLeft = exData[currentExIndex].rest;
+    } else {
+      nextExercise();
+    }
+  }
+}
+
+function startProgram() {
+  if (started) return;
+  started = true;
+  elapsed = 0;
+  currentExIndex = 0;
+  currentPhase = 'work';
+  timeLeft = exData[0].duration;
+  totalTime = getTotalTime();
+  setBtn('startBtn', false);
+  setBtn('pauseBtn', true);
+  updateUI();
+  timerInterval = setInterval(tick, 1000);
+}
+
+function togglePause() {
+  if (!started) return;
+  paused = !paused;
+  document.getElementById('pauseBtn').textContent = paused ? 'Devam Et' : 'Duraklat';
+}
+
+function resetProgram() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  started = false;
+  paused = false;
+  currentExIndex = -1;
+  elapsed = 0;
+  document.getElementById('timerDisplay').textContent = '00:00';
+  document.getElementById('timerDisplay').className = 'timer-display';
+  document.getElementById('timerPhase').textContent = '-';
+  document.getElementById('currentExName').textContent = 'Baslamak icin butona bas';
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressFill').className = 'progress-fill';
+  document.getElementById('pauseBtn').textContent = 'Duraklat';
+  setBtn('startBtn', true);
+  setBtn('pauseBtn', false);
+  for (var i = 0; i < exData.length; i++) {
+    document.getElementById('exCard' + i).className = 'exercise-card';
+  }
+}
+
+function finishProgram() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  started = false;
+  document.getElementById('timerDisplay').textContent = 'BITTI';
+  document.getElementById('timerDisplay').className = 'timer-display done';
+  document.getElementById('currentExName').textContent = 'Program tamamlandi!';
+  document.getElementById('timerPhase').textContent = 'Tebrikler';
+  document.getElementById('progressFill').style.width = '100%';
+  setBtn('pauseBtn', false);
+  setBtn('startBtn', true);
+  for (var i = 0; i < exData.length; i++) {
+    document.getElementById('exCard' + i).className = 'exercise-card completed';
+  }
+}
+</script>
+</body>
+</html>
